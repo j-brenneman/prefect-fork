@@ -90,18 +90,28 @@ const DeleteMenuItem = ({
 	const [isOpen, setIsOpen] = useState(false);
 	const { mutate: deleteFlow, isPending } = useMutation(deleteFlowMutation(id));
 
+	const onOpenChange = useCallback(
+		(isOpen: boolean) => {
+			if (!isOpen && onClose) {
+				onClose();
+			}
+			setIsOpen(isOpen);
+		},
+		[setIsOpen, onClose],
+	);
+
 	const onSelect = useCallback(
 		(event: Event) => {
 			event.preventDefault();
-			setIsOpen(true);
+			onOpenChange(true);
 		},
-		[setIsOpen],
+		[onOpenChange],
 	);
 
 	const handleDelete = useCallback(() => {
 		deleteFlow();
-		if (onClose) onClose();
-	}, [deleteFlow, onClose]);
+		onOpenChange(false);
+	}, [deleteFlow, onOpenChange]);
 
 	return (
 		<>
@@ -111,7 +121,7 @@ const DeleteMenuItem = ({
 				label="Flow"
 				name={name}
 				deletionIsPending={isPending}
-				onOpenChange={setIsOpen}
+				onOpenChange={onOpenChange}
 				handleDelete={handleDelete}
 			/>
 		</>

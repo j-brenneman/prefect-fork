@@ -96,8 +96,8 @@ describe("ConfirmDeleteDialog", () => {
 		const listItemOne = screen.getByText(listItemOneName);
 		await user.click(listItemOne);
 
-		const cancelButton = screen.getByRole("button", { name: /cancel/i });
-		await user.click(cancelButton);
+		const closeButton = screen.getByRole("button", { name: /close/i });
+		await user.click(closeButton);
 
 		expect(list.childNodes.length).toEqual(2);
 	});

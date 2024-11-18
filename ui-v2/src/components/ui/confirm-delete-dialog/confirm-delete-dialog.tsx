@@ -8,7 +8,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { CircleAlert, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 
 type ConfirmDeleteDialogProps = {
@@ -39,13 +39,16 @@ export const ConfirmDeleteDialog = ({
 		<AlertDialog open={open} onOpenChange={onClose}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>{`Delete ${label ?? name}`}</AlertDialogTitle>
+					<AlertDialogTitle className="flex flex-row items-center">
+						<CircleAlert className="text-red-500 mr-2" />
+						{`Delete ${label ?? name}`}
+					</AlertDialogTitle>
 					<AlertDialogDescription>
 						{`Are you sure you want to delete ${label ?? name}?`}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel onClick={onClose}>Close</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={onContinue}
 						disabled={deletionIsPending}
