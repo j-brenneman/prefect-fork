@@ -9,11 +9,14 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 import { MoreVerticalIcon } from "lucide-react";
+import { useCallback, useState } from "react";
+import { ConfirmDeleteDialog } from "../ui/confirm-delete-dialog";
 import {
+	deleteFlowMutation,
 	deploymentsCountQueryParams,
 	getLatestFlowRunsQueryParams,
 	getNextFlowRunsQueryParams,
@@ -75,13 +78,57 @@ export const FlowDeploymentCount = ({ row }: { row: { original: Flow } }) => {
 	return data;
 };
 
+const DeleteMenuItem = ({
+	id,
+	name,
+	onClose,
+}: {
+	id: string;
+	name: string;
+	onClose?: () => void;
+}) => {
+	const [isOpen, setIsOpen] = useState(false);
+	const { mutate: deleteFlow, isPending } = useMutation(deleteFlowMutation(id));
+
+	const onSelect = useCallback(
+		(event: Event) => {
+			event.preventDefault();
+			setIsOpen(true);
+		},
+		[setIsOpen],
+	);
+
+	const handleDelete = useCallback(() => {
+		deleteFlow();
+		if (onClose) onClose();
+	}, [deleteFlow, onClose]);
+
+	return (
+		<>
+			<DropdownMenuItem onSelect={onSelect}>Delete</DropdownMenuItem>
+			<ConfirmDeleteDialog
+				open={isOpen}
+				label="Flow"
+				name={name}
+				deletionIsPending={isPending}
+				onOpenChange={setIsOpen}
+				handleDelete={handleDelete}
+			/>
+		</>
+	);
+};
+
 export const FlowActionMenu = ({ row }: { row: { original: Flow } }) => {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const id = row.original.id;
 	if (!id) {
 		return null;
 	}
 	return (
-		<DropdownMenu>
+		<DropdownMenu
+			open={isMenuOpen}
+			onOpenChange={(isOpen) => setIsMenuOpen(isOpen)}
+		>
 			<DropdownMenuTrigger asChild>
 				<Button variant="ghost" className="h-8 w-8 p-0">
 					<span className="sr-only">Open menu</span>
@@ -96,7 +143,11 @@ export const FlowActionMenu = ({ row }: { row: { original: Flow } }) => {
 					Copy ID
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Delete</DropdownMenuItem>
+				<DeleteMenuItem
+					id={id}
+					name={row.original.name}
+					onClose={() => setIsMenuOpen(false)}
+				/>
 				<DropdownMenuItem>Automate</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

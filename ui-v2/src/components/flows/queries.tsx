@@ -1,7 +1,8 @@
 import { components } from "@/api/prefect";
 import { getQueryService } from "@/api/service";
+import { queryClient } from "@/router";
 import {
-	MutationFunction,
+	MutationOptions,
 	QueryFunction,
 	QueryKey,
 	QueryObserverOptions,
@@ -213,14 +214,18 @@ export const deploymentsCountQueryParams = (
 	},
 });
 
-export const deleteFlowMutation = (
-	id: string,
-): {
-	mutationFn: MutationFunction<void>;
-} => ({
+export const deleteFlowMutation = (id: string): MutationOptions => ({
 	mutationFn: async () => {
 		await getQueryService().DELETE("/flows/{id}", {
 			params: { path: { id } },
+		});
+	},
+	onSettled: () => {
+		return queryClient.invalidateQueries({
+			predicate: (query) => {
+				const firstKey = query.queryKey[0];
+				return typeof firstKey === "string" && firstKey.includes("flows");
+			},
 		});
 	},
 });
@@ -321,9 +326,7 @@ export class FlowQuery {
 		return deploymentsCountQueryParams(this.flowId, queryParams);
 	}
 
-	public getDeleteFlowMutation(): {
-		mutationFn: MutationFunction<void>;
-	} {
+	public getDeleteFlowMutation(): MutationOptions {
 		return deleteFlowMutation(this.flowId);
 	}
 }
