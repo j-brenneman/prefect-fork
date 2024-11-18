@@ -8,13 +8,15 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { MutationOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 import { MoreVerticalIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ConfirmDeleteDialog } from "../ui/confirm-delete-dialog";
+
 import {
 	deleteFlowMutation,
 	deploymentsCountQueryParams,
@@ -88,7 +90,7 @@ const DeleteMenuItem = ({
 	onClose?: () => void;
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { mutate: deleteFlow, isPending } = useMutation(deleteFlowMutation(id));
+	const { toast } = useToast();
 
 	const onOpenChange = useCallback(
 		(isOpen: boolean) => {
@@ -108,10 +110,23 @@ const DeleteMenuItem = ({
 		[onOpenChange],
 	);
 
-	const handleDelete = useCallback(() => {
-		deleteFlow();
-		onOpenChange(false);
-	}, [deleteFlow, onOpenChange]);
+	const mutationOptions: MutationOptions = useMemo(
+		() => ({
+			onSuccess: () => {
+				toast({ title: "Flow Deleted" });
+				onOpenChange(false);
+			},
+			onError: (error) => {
+				const title = error.message || "Unknown error while deleting flow.";
+				toast({ title });
+			},
+		}),
+		[toast, onOpenChange],
+	);
+
+	const { mutate: deleteFlow, isPending } = useMutation(
+		deleteFlowMutation(id, mutationOptions),
+	);
 
 	return (
 		<>
@@ -122,7 +137,7 @@ const DeleteMenuItem = ({
 				name={name}
 				deletionIsPending={isPending}
 				onOpenChange={onOpenChange}
-				handleDelete={handleDelete}
+				handleDelete={deleteFlow}
 			/>
 		</>
 	);

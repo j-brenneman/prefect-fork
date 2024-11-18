@@ -44,7 +44,7 @@ export const ConfirmDeleteDialog = ({
 						{`Delete ${label ?? name}`}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
-						{`Are you sure you want to delete ${label ?? name}?`}
+						{`Are you sure you want to delete ${name}?`}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

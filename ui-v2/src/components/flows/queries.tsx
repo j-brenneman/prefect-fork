@@ -214,7 +214,10 @@ export const deploymentsCountQueryParams = (
 	},
 });
 
-export const deleteFlowMutation = (id: string): MutationOptions => ({
+export const deleteFlowMutation = (
+	id: string,
+	options: MutationOptions = {},
+): MutationOptions => ({
 	mutationFn: async () => {
 		await getQueryService().DELETE("/flows/{id}", {
 			params: { path: { id } },
@@ -228,6 +231,7 @@ export const deleteFlowMutation = (id: string): MutationOptions => ({
 			},
 		});
 	},
+	...options,
 });
 
 // Define the Flow class
